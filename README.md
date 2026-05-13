@@ -1,35 +1,16 @@
 # Faah
 
-Faah is a small zsh plugin that plays an alert sound when an interactive command exits with a non-zero status.
+Faah is a small oh-my-zsh plugin that plays an alert sound when an interactive command exits with a non-zero status.
 
 It is meant for the tiny moments where a command fails while your attention has already wandered somewhere else.
 
-## Install
-
-Source the plugin from this checkout:
-
-```zsh
-source /path/to/faah/zsh/faah.zsh
-```
-
-For a permanent install, add the source line near the end of `~/.zshrc`:
-
-```zsh
-source /path/to/faah/zsh/faah.zsh
-```
-
-Then restart zsh or run:
-
-```zsh
-source ~/.zshrc
-```
 
 ### Oh My Zsh
 
 Clone this repository to your Oh My Zsh custom plugins directory:
 
 ```zsh
-git clone https://github.com/kiron0/faah.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/faah
+git clone https://github.com/izzaaaatanishq/faah.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/faah
 ```
 
 Then add `faah` to your plugins list in `~/.zshrc`:
