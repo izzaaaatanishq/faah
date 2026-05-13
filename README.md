@@ -49,6 +49,7 @@ If your errors get dramatic — **Faah gets louder.**
 - Compatibility status command with full/partial/unavailable terminal host reporting
 - Workspace-aware settings (`faah.*`) with auto-save Control Room UI
 - Status bar indicator with source-aware quick actions
+- Optional zsh companion plugin for shell-native non-zero exit-code alerts
 
 ---
 
@@ -72,6 +73,18 @@ Command Palette commands:
 - `Faah: Clear Snooze`
 - `Faah: Set Quiet Hours`
 - `Faah: Show Compatibility Status` (raises host compatibility info)
+
+### zsh companion
+
+Faah also includes a shell-native zsh companion at `zsh/faah.zsh`.
+
+```zsh
+source /path/to/faah/zsh/faah.zsh
+```
+
+Add the source line near the end of `~/.zshrc`; `faah-status` should show `Hooks: installed`.
+
+The zsh plugin alerts on non-zero command exit status using `preexec`/`precmd` hooks. Output regex monitoring is still handled by the VS Code extension because zsh hooks cannot safely inspect every command's output stream without wrapping commands.
 
 ---
 
