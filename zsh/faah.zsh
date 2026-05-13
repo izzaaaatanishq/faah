@@ -23,8 +23,8 @@ typeset -g _FAAH_SOUND_PATH="${_FAAH_SOUND_PATH:-}"
 typeset -g _FAAH_VOLUME_PERCENT="${_FAAH_VOLUME_PERCENT:-70}"
 typeset -g _FAAH_COOLDOWN_SECONDS="${_FAAH_COOLDOWN_SECONDS:-1.5}"
 typeset -g _FAAH_MIN_DURATION_SECONDS="${_FAAH_MIN_DURATION_SECONDS:-0}"
-typeset -g _FAAH_IGNORE_EXIT_CODES="${_FAAH_IGNORE_EXIT_CODES:-130}"
-typeset -g _FAAH_IGNORE_COMMAND_REGEX="${_FAAH_IGNORE_COMMAND_REGEX:-}"
+typeset -g _FAAH_IGNORE_EXIT_CODES="130"
+typeset -g _FAAH_IGNORE_COMMAND_REGEX=""
 
 _faah_config_file() {
   if [[ -n "$_FAAH_CONFIG_FILE" ]]; then
@@ -48,8 +48,6 @@ _faah_clear_public_settings() {
   unset FAAH_VOLUME_PERCENT
   unset FAAH_COOLDOWN_SECONDS
   unset FAAH_MIN_DURATION_SECONDS
-  unset FAAH_IGNORE_EXIT_CODES
-  unset FAAH_IGNORE_COMMAND_REGEX
   unset FAAH_PLAYER
   unset FAAH_CONFIG_FILE
 }
@@ -225,7 +223,7 @@ _faah_play() {
 
 _faah_exit_code_ignored() {
   local exit_status="$1"
-  local ignored="${_FAAH_IGNORE_EXIT_CODES:-130}"
+  local ignored="$_FAAH_IGNORE_EXIT_CODES"
   local normalized="${ignored//,/ }"
   local code
 
@@ -390,7 +388,7 @@ faah-status() {
   print -r -- "Player: $(_faah_select_player 2>/dev/null || print -r -- unavailable)"
   print -r -- "Cooldown: ${_FAAH_COOLDOWN_SECONDS:-1.5}s"
   print -r -- "Minimum duration: ${_FAAH_MIN_DURATION_SECONDS:-0}s"
-  print -r -- "Ignored exit codes: ${_FAAH_IGNORE_EXIT_CODES:-130}"
+  print -r -- "Ignored exit codes: ${_FAAH_IGNORE_EXIT_CODES}"
   return 0
 }
 

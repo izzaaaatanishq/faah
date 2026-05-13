@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import argparse
 import os
-import re
 import shlex
 import subprocess
 from pathlib import Path
@@ -28,8 +27,6 @@ CONFIG_KEYS = [
     "_FAAH_VOLUME_PERCENT",
     "_FAAH_COOLDOWN_SECONDS",
     "_FAAH_MIN_DURATION_SECONDS",
-    "_FAAH_IGNORE_EXIT_CODES",
-    "_FAAH_IGNORE_COMMAND_REGEX",
 ]
 
 DEFAULTS = {
@@ -39,11 +36,8 @@ DEFAULTS = {
     "_FAAH_VOLUME_PERCENT": "70",
     "_FAAH_COOLDOWN_SECONDS": "1.5",
     "_FAAH_MIN_DURATION_SECONDS": "0",
-    "_FAAH_IGNORE_EXIT_CODES": "130",
-    "_FAAH_IGNORE_COMMAND_REGEX": "",
 }
 
-EXIT_CODES_RE = re.compile(r"^\s*\d+(\s*[, ]\s*\d+)*\s*$")
 WAV_SUFFIX = ".wav"
 
 
@@ -97,11 +91,6 @@ def bool_text(value: bool) -> str:
     return "1" if value else "0"
 
 
-def normalize_exit_codes(value: str) -> str:
-    codes = [part for part in re.split(r"[, ]+", value.strip()) if part]
-    return " ".join(codes)
-
-
 def write_config(path: Path, values: dict[str, str]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     lines = [
@@ -130,10 +119,6 @@ class FaahSettingsWindow:
         self.volume = IntVar(value=self.safe_int(self.values["_FAAH_VOLUME_PERCENT"], 70))
         self.cooldown = StringVar(value=self.values["_FAAH_COOLDOWN_SECONDS"])
         self.min_duration = StringVar(value=self.values["_FAAH_MIN_DURATION_SECONDS"])
-        self.ignore_exit_codes = StringVar(value=self.values["_FAAH_IGNORE_EXIT_CODES"])
-        self.ignore_command_regex = StringVar(
-            value=self.values["_FAAH_IGNORE_COMMAND_REGEX"]
-        )
         self.status_text = StringVar(value=f"Settings file: {self.config_path}")
 
         self.build()
@@ -193,8 +178,6 @@ class FaahSettingsWindow:
 
         self.entry_row(frame, 5, "Cooldown seconds", self.cooldown)
         self.entry_row(frame, 6, "Minimum duration", self.min_duration)
-        self.entry_row(frame, 7, "Ignored exit codes", self.ignore_exit_codes)
-        self.entry_row(frame, 8, "Ignore command regex", self.ignore_command_regex)
 
         buttons = ttk.Frame(frame)
         buttons.grid(row=9, column=0, columnspan=3, sticky="ew", pady=(22, 8))
@@ -260,14 +243,6 @@ class FaahSettingsWindow:
                 messagebox.showerror("Invalid Number", f"{label} must be 0 or higher.")
                 return None
 
-        ignored = self.ignore_exit_codes.get().strip()
-        if ignored and not EXIT_CODES_RE.match(ignored):
-            messagebox.showerror(
-                "Invalid Exit Codes",
-                "Ignored exit codes must be numbers separated by spaces or commas.",
-            )
-            return None
-
         try:
             volume = max(0, min(100, int(float(self.volume.get()))))
         except (TclError, ValueError):
@@ -281,8 +256,6 @@ class FaahSettingsWindow:
             "_FAAH_VOLUME_PERCENT": str(volume),
             "_FAAH_COOLDOWN_SECONDS": cooldown,
             "_FAAH_MIN_DURATION_SECONDS": min_duration,
-            "_FAAH_IGNORE_EXIT_CODES": normalize_exit_codes(ignored),
-            "_FAAH_IGNORE_COMMAND_REGEX": self.ignore_command_regex.get().strip(),
         }
 
     def save(self) -> bool:
