@@ -79,8 +79,8 @@ _faah_select_player() {
 }
 
 _faah_clamped_volume() {
-  local raw_value="${FAAH_VOLUME_PERCENT:-${FAAH_VOLUME:-70}}"
-  local value=70
+  local raw_value="${FAAH_VOLUME_PERCENT:-${FAAH_VOLUME:-100}}"
+  local value=100
   local numeric_regex='^-?[0-9]+([.][0-9]+)?$'
 
   if [[ "$raw_value" =~ $numeric_regex ]]; then
