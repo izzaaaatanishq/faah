@@ -299,6 +299,23 @@ _faah_install_hooks() {
   precmd_functions=(_faah_precmd ${precmd_functions:#_faah_precmd})
 }
 
+_faah_uninstall_hooks() {
+  autoload -Uz add-zsh-hook
+  add-zsh-hook -d preexec _faah_preexec 2>/dev/null
+  add-zsh-hook -d precmd _faah_precmd 2>/dev/null
+  preexec_functions=(${preexec_functions:#_faah_preexec})
+  precmd_functions=(${precmd_functions:#_faah_precmd})
+}
+
+_faah_write_config() {
+  local config_file="$(_faah_config_file)"
+  mkdir -p "${config_file:h}"
+  cat > "$config_file" << EOF
+# Faah zsh settings
+_FAAH_ENABLED=$_FAAH_ENABLED
+EOF
+}
+
 _faah_hook_state() {
   local has_preexec=0
   local has_precmd=0
@@ -315,13 +332,16 @@ _faah_hook_state() {
 
 faah-enable() {
   typeset -g _FAAH_ENABLED=1
+  _faah_write_config
   _faah_install_hooks
-  print -r -- "Faah zsh alerts enabled."
+  print -r -- "✓ Faah alerts enabled globally."
 }
 
 faah-disable() {
   typeset -g _FAAH_ENABLED=0
-  print -r -- "Faah zsh alerts disabled."
+  _faah_write_config
+  _faah_uninstall_hooks
+  print -r -- "✓ Faah alerts disabled globally."
 }
 
 faah-snooze() {

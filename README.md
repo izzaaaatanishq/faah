@@ -68,12 +68,12 @@ false
 
 | Command | Description |
 |---------|-------------|
-| `faah-enable` | Enable alerts and install hooks |
-| `faah-disable` | Disable alerts and remove hooks |
+| `faah-enable` | Enable alerts globally and persist setting |
+| `faah-disable` | Disable alerts globally and persist setting |
 | `faah-status` | Show current status and configuration |
 | `faah-settings` | Open GUI settings window |
 | `faah-reload-config` | Reload configuration from file |
-| `faah-snooze <seconds>` | Temporarily disable alerts (e.g., `faah-snooze 300`) |
+| `faah-snooze <seconds>` | Temporarily disable alerts in current session (e.g., `faah-snooze 300`) |
 | `faah-clear-snooze` | Re-enable alerts after snoozing |
 | `faah-test` | Play the alert sound |
 
