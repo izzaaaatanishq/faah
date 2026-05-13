@@ -309,11 +309,36 @@ _faah_uninstall_hooks() {
 
 _faah_write_config() {
   local config_file="$(_faah_config_file)"
+  local temp_file
   mkdir -p "${config_file:h}"
-  cat > "$config_file" << EOF
+  temp_file=$(mktemp "${config_file}.tmp.XXXXXX") || return 1
+
+  if [[ -f "$config_file" ]]; then
+    local line
+    local had_enabled=0
+
+    while IFS= read -r line || [[ -n "$line" ]]; do
+      case "$line" in
+        export\ _FAAH_ENABLED=* )
+          print -r -- "export _FAAH_ENABLED=$_FAAH_ENABLED" ; had_enabled=1 ;;
+        _FAAH_ENABLED=* )
+          print -r -- "_FAAH_ENABLED=$_FAAH_ENABLED" ; had_enabled=1 ;;
+        *)
+          print -r -- "$line" ;;
+      esac
+    done < "$config_file" > "$temp_file"
+
+    if (( had_enabled == 0 )); then
+      print -r -- "_FAAH_ENABLED=$_FAAH_ENABLED" >> "$temp_file"
+    fi
+  else
+    cat > "$temp_file" << EOF
 # Faah zsh settings
 _FAAH_ENABLED=$_FAAH_ENABLED
 EOF
+  fi
+
+  mv "$temp_file" "$config_file"
 }
 
 _faah_hook_state() {
