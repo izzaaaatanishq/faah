@@ -47,27 +47,29 @@ false
 ```zsh
 faah-enable
 faah-disable
+faah-settings
+faah-reload-config
 faah-snooze 15
 faah-clear-snooze
 faah-test
 faah-status
 ```
 
+`faah-settings` opens a small GUI window for changing settings. It saves to `~/.config/faah/faah.env` by default, then reloads the current shell after the window closes.
+
 ## Configuration
 
-Set these before or after sourcing `zsh/faah.zsh`:
+Faah uses defaults from `zsh/faah.zsh` until you save settings from the GUI.
 
 ```zsh
-export FAAH_SOUND_PATH=/path/to/faah.wav
-export FAAH_VOLUME_PERCENT=70
-export FAAH_COOLDOWN_SECONDS=1.5
-export FAAH_MIN_DURATION_SECONDS=0
-export FAAH_IGNORE_EXIT_CODES="130"
-export FAAH_IGNORE_COMMAND_REGEX='^(grep|test|\\[)'
-export FAAH_QUIET_HOURS="22:00-07:00"
+faah-settings
 ```
 
-Audio playback uses the first available player from `afplay`, `paplay`, `ffplay`, `mpv`, `cvlc`, `mplayer`, `mpg123`, `mpg321`, `play`, or `aplay`. Override detection with `FAAH_PLAYER`.
+The GUI saves to `~/.config/faah/faah.env`. The plugin reloads that file on startup and after the GUI closes.
+
+Audio playback auto-detects the first available player from `afplay`, `paplay`, `ffplay`, `mpv`, `cvlc`, `mplayer`, `mpg123`, `mpg321`, `play`, or `aplay`.
+
+Only `.wav` sound files are allowed.
 
 ## Notes
 
