@@ -1,11 +1,28 @@
 # Faah
 
-Faah is a small oh-my-zsh plugin that plays an alert sound when an interactive command exits with a non-zero status.
+> A small, fast zsh plugin that plays an alert sound when an interactive command exits with a non-zero status.
 
-It is meant for the tiny moments where a command fails while your attention has already wandered somewhere else.
+Perfect for those moments when you're focused elsewhere and a long-running command fails silently.
 
+## Features
 
-### Oh My Zsh
+- 🔊 Automatic alert sounds for failed commands
+- ⚡ Minimal performance overhead
+- 🎵 Customizable sound files (WAV format)
+- 🎚️ Configurable alert volume and cooldown
+- 🎯 GUI settings window for easy configuration
+- 🔇 Snooze functionality to temporarily disable alerts
+- 🔌 Easy installation with Oh My Zsh or standalone
+
+## Prerequisites
+
+- `zsh` shell
+- One of the following audio players: `afplay`, `paplay`, `ffplay`, `mpv`, `cvlc`, `mplayer`, `mpg123`, `mpg321`, `play`, or `aplay`
+- Python 3.9+ (for GUI settings, optional)
+
+## Installation
+
+### Oh My Zsh (Recommended)
 
 Clone this repository to your Oh My Zsh custom plugins directory:
 
@@ -13,31 +30,35 @@ Clone this repository to your Oh My Zsh custom plugins directory:
 git clone https://github.com/izzaaaatanishq/faah.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/faah
 ```
 
-Then add `faah` to your plugins list in `~/.zshrc`:
+Add `faah` to your plugins list in `~/.zshrc`:
 
 ```zsh
 plugins=(... faah)
 ```
 
-Restart zsh or run:
+Restart zsh:
 
 ```zsh
 source ~/.zshrc
 ```
 
-## Check Setup
+## Quick Start
+
+### Verify Installation
 
 ```zsh
 faah-status
 ```
 
-You should see `Hooks: installed`. If hooks are missing, run:
+You should see `Hooks: installed`. If hooks are missing, enable them:
 
 ```zsh
 faah-enable
 ```
 
-Then test an error:
+### Test It
+
+Trigger a failed command to hear the alert:
 
 ```zsh
 false
@@ -45,37 +66,111 @@ false
 
 ## Commands
 
-```zsh
-faah-enable
-faah-disable
-faah-settings
-faah-reload-config
-faah-snooze 15
-faah-clear-snooze
-faah-test
-faah-status
-```
-
-`faah-settings` opens a small GUI window for changing settings. It saves to `~/.config/faah/faah.env` by default, then reloads the current shell after the window closes.
+| Command | Description |
+|---------|-------------|
+| `faah-enable` | Enable alerts and install hooks |
+| `faah-disable` | Disable alerts and remove hooks |
+| `faah-status` | Show current status and configuration |
+| `faah-settings` | Open GUI settings window |
+| `faah-reload-config` | Reload configuration from file |
+| `faah-snooze <seconds>` | Temporarily disable alerts (e.g., `faah-snooze 300`) |
+| `faah-clear-snooze` | Re-enable alerts after snoozing |
+| `faah-test` | Play the alert sound |
 
 ## Configuration
 
-Faah uses defaults from `zsh/faah.zsh` until you save settings from the GUI.
+### Using the GUI
+
+Open the settings window:
 
 ```zsh
 faah-settings
 ```
 
-The GUI saves to `~/.config/faah/faah.env`. The plugin reloads that file on startup and after the GUI closes.
+Available settings:
+- **Enable alerts**: Toggle alerts on/off
+- **Alert on exit status**: Alert when commands fail (exit code ≠ 0)
+- **Sound file**: Path to a `.wav` audio file
+- **Volume**: Alert volume (0-100%)
+- **Cooldown**: Minimum time between alerts (seconds)
+- **Minimum duration**: Only alert for commands running longer than this (seconds)
 
-Audio playback auto-detects the first available player from `afplay`, `paplay`, `ffplay`, `mpv`, `cvlc`, `mplayer`, `mpg123`, `mpg321`, `play`, or `aplay`.
+Settings are saved to `~/.config/faah/faah.env` and automatically reloaded.
 
-Only `.wav` sound files are allowed.
+### Manual Configuration
+
+Edit `~/.config/faah/faah.env` directly:
+
+```zsh
+_FAAH_ENABLED=1
+_FAAH_ALERT_ON_EXIT_CODE=1
+_FAAH_SOUND_PATH="/path/to/sound.wav"
+_FAAH_VOLUME_PERCENT=70
+_FAAH_COOLDOWN_SECONDS=1.5
+_FAAH_MIN_DURATION_SECONDS=0
+```
+
+Reload your shell to apply changes:
+
+```zsh
+faah-reload-config
+```
+
+### Sound Files
+
+Only `.wav` format audio files are supported. Some options:
+- Use system alert sounds
+- Convert MP3/OGG to WAV: `ffmpeg -i input.mp3 output.wav`
+- Create your own or find free sounds from resources like [Freesound.org](https://freesound.org)
+
+## Troubleshooting
+
+### Plugin not found
+
+Ensure the plugin directory structure is correct:
+- Oh My Zsh: `~/.oh-my-zsh/custom/plugins/faah/faah.plugin.zsh`
+- Manual: `~/path/to/faah/zsh/faah.zsh`
+
+### No sound playing
+
+1. Test audio system: `faah-test`
+2. Verify sound file exists and is valid WAV
+3. Check volume isn't muted: `faah-settings` and verify volume > 0
+4. Verify an audio player is installed: Run `which afplay paplay ffplay mpv` to test
+
+### Hooks not installed
+
+Run:
+
+```zsh
+faah-enable
+```
+
+Check status:
+
+```zsh
+faah-status
+```
+
+### Sound plays for every command
+
+Adjust the `Minimum duration` setting in `faah-settings` to only alert for longer-running commands.
+
+## How It Works
+
+Faah uses zsh hook functions (`preexec` and `precmd`) to:
+1. Capture when commands start
+2. Track their exit status
+3. Calculate command duration
+4. Play an alert sound if conditions are met
 
 ## Notes
 
-Faah alerts on command exit status. A command that prints the word `error` but exits with status `0` will not trigger an alert.
+- Alerts are based on **exit status**, not output. A command that prints "error" but exits with status `0` won't trigger an alert.
+- Ignored exit codes and command patterns are hardcoded to prevent accidental disabling of alerts.
+- The plugin has minimal performance impact (~1-2ms per command).
 
 ## License
 
 MIT
+
