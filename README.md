@@ -24,6 +24,26 @@ Then restart zsh or run:
 source ~/.zshrc
 ```
 
+### Oh My Zsh
+
+Clone this repository to your Oh My Zsh custom plugins directory:
+
+```zsh
+git clone https://github.com/kiron0/faah.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/faah
+```
+
+Then add `faah` to your plugins list in `~/.zshrc`:
+
+```zsh
+plugins=(... faah)
+```
+
+Restart zsh or run:
+
+```zsh
+source ~/.zshrc
+```
+
 ## Check Setup
 
 ```zsh
