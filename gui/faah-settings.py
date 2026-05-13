@@ -132,34 +132,47 @@ class FaahSettingsWindow:
 
     def build(self) -> None:
         self.root.title("Faah Settings")
-        self.root.minsize(560, 560)
+        self.root.minsize(480, 380)
+        self.root.resizable(True, False)  # Allow horizontal resize, fixed height
 
-        frame = ttk.Frame(self.root, padding=18)
+        # Center the window on screen
+        self.root.update_idletasks()
+        width = self.root.winfo_width()
+        height = self.root.winfo_height()
+        x = (self.root.winfo_screenwidth() // 2) - (width // 2)
+        y = (self.root.winfo_screenheight() // 2) - (height // 2)
+        self.root.geometry(f"{width}x{height}+{x}+{y}")
+
+        frame = ttk.Frame(self.root, padding=20)
         frame.grid(row=0, column=0, sticky="nsew")
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
         frame.columnconfigure(1, weight=1)
 
-        title = ttk.Label(frame, text="Faah Settings", font=("", 18, "bold"))
-        title.grid(row=0, column=0, columnspan=3, sticky="w", pady=(0, 12))
+        title = ttk.Label(frame, text="Faah Settings", font=("", 16, "bold"))
+        title.grid(row=0, column=0, columnspan=3, sticky="w", pady=(0, 15))
 
+        # General settings
         ttk.Checkbutton(frame, text="Enable alerts", variable=self.enabled).grid(
-            row=1, column=0, columnspan=3, sticky="w"
+            row=1, column=0, columnspan=3, sticky="w", pady=(0, 5)
         )
         ttk.Checkbutton(
             frame,
             text="Alert on non-zero command exit status",
             variable=self.alert_on_exit,
-        ).grid(row=2, column=0, columnspan=3, sticky="w", pady=(0, 12))
+        ).grid(row=2, column=0, columnspan=3, sticky="w", pady=(0, 15))
 
-        self.entry_row(frame, 3, "Sound file", self.sound_path)
+        ttk.Separator(frame, orient="horizontal").grid(row=3, column=0, columnspan=3, sticky="ew", pady=(0, 10))
+
+        # Sound settings
+        self.entry_row(frame, 4, "Sound file", self.sound_path)
         ttk.Button(frame, text="Browse", command=self.browse_sound).grid(
-            row=3, column=2, sticky="ew", padx=(8, 0)
+            row=4, column=2, sticky="ew", padx=(8, 0)
         )
 
-        ttk.Label(frame, text="Volume").grid(row=4, column=0, sticky="w", pady=(12, 4))
+        ttk.Label(frame, text="Volume (%)", font=("", 10, "bold")).grid(row=5, column=0, sticky="w", pady=(15, 5))
         volume_frame = ttk.Frame(frame)
-        volume_frame.grid(row=4, column=1, columnspan=2, sticky="ew", pady=(12, 4))
+        volume_frame.grid(row=5, column=1, columnspan=2, sticky="ew", pady=(15, 5))
         volume_frame.columnconfigure(0, weight=1)
         ttk.Scale(
             volume_frame,
@@ -176,11 +189,16 @@ class FaahSettingsWindow:
             width=5,
         ).grid(row=0, column=1, sticky="e", padx=(8, 0))
 
-        self.entry_row(frame, 5, "Cooldown seconds", self.cooldown)
-        self.entry_row(frame, 6, "Minimum duration", self.min_duration)
+        ttk.Separator(frame, orient="horizontal").grid(row=6, column=0, columnspan=3, sticky="ew", pady=(10, 10))
 
+        # Timing settings
+        ttk.Label(frame, text="Timing", font=("", 10, "bold")).grid(row=7, column=0, sticky="w", pady=(0, 5))
+        self.entry_row(frame, 8, "Cooldown seconds", self.cooldown)
+        self.entry_row(frame, 9, "Minimum duration", self.min_duration)
+
+        # Buttons
         buttons = ttk.Frame(frame)
-        buttons.grid(row=9, column=0, columnspan=3, sticky="ew", pady=(22, 8))
+        buttons.grid(row=10, column=0, columnspan=3, sticky="ew", pady=(20, 10))
         buttons.columnconfigure(0, weight=1)
         ttk.Button(buttons, text="Test Sound", command=self.test_sound).grid(
             row=0, column=0, sticky="w"
@@ -192,12 +210,15 @@ class FaahSettingsWindow:
             row=0, column=2, sticky="e", padx=(8, 0)
         )
 
-        ttk.Label(frame, textvariable=self.status_text, foreground="#555").grid(
-            row=10, column=0, columnspan=3, sticky="w", pady=(10, 0)
+        ttk.Label(frame, textvariable=self.status_text, foreground="#555", font=("", 9)).grid(
+            row=11, column=0, columnspan=3, sticky="w", pady=(5, 0)
         )
 
+        # Adjust padding for all children
         for child in frame.winfo_children():
-            child.grid_configure(pady=4)
+            if isinstance(child, ttk.Separator):
+                continue
+            child.grid_configure(pady=3)
 
     def entry_row(
         self, frame: ttk.Frame, row: int, label: str, variable: StringVar
