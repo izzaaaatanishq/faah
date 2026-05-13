@@ -30,7 +30,6 @@ CONFIG_KEYS = [
     "_FAAH_MIN_DURATION_SECONDS",
     "_FAAH_IGNORE_EXIT_CODES",
     "_FAAH_IGNORE_COMMAND_REGEX",
-    "_FAAH_QUIET_HOURS",
 ]
 
 DEFAULTS = {
@@ -42,10 +41,8 @@ DEFAULTS = {
     "_FAAH_MIN_DURATION_SECONDS": "0",
     "_FAAH_IGNORE_EXIT_CODES": "130",
     "_FAAH_IGNORE_COMMAND_REGEX": "",
-    "_FAAH_QUIET_HOURS": "",
 }
 
-TIME_RE = re.compile(r"^([01]?\d|2[0-3]):[0-5]\d$")
 EXIT_CODES_RE = re.compile(r"^\s*\d+(\s*[, ]\s*\d+)*\s*$")
 WAV_SUFFIX = ".wav"
 
@@ -125,12 +122,6 @@ class FaahSettingsWindow:
         self.plugin_root = plugin_root
         self.values = initial_values(config_path)
 
-        quiet_range = self.values["_FAAH_QUIET_HOURS"].strip()
-        quiet_enabled = bool(quiet_range)
-        quiet_start, quiet_end = "22:00", "07:00"
-        if "-" in quiet_range:
-            quiet_start, quiet_end = quiet_range.split("-", 1)
-
         self.enabled = BooleanVar(value=shell_bool(self.values["_FAAH_ENABLED"]))
         self.alert_on_exit = BooleanVar(
             value=shell_bool(self.values["_FAAH_ALERT_ON_EXIT_CODE"])
@@ -143,9 +134,6 @@ class FaahSettingsWindow:
         self.ignore_command_regex = StringVar(
             value=self.values["_FAAH_IGNORE_COMMAND_REGEX"]
         )
-        self.quiet_enabled = BooleanVar(value=quiet_enabled)
-        self.quiet_start = StringVar(value=quiet_start)
-        self.quiet_end = StringVar(value=quiet_end)
         self.status_text = StringVar(value=f"Settings file: {self.config_path}")
 
         self.build()
@@ -208,25 +196,8 @@ class FaahSettingsWindow:
         self.entry_row(frame, 7, "Ignored exit codes", self.ignore_exit_codes)
         self.entry_row(frame, 8, "Ignore command regex", self.ignore_command_regex)
 
-        ttk.Checkbutton(
-            frame, text="Enable quiet hours", variable=self.quiet_enabled
-        ).grid(row=9, column=0, columnspan=3, sticky="w", pady=(14, 4))
-
-        quiet_frame = ttk.Frame(frame)
-        quiet_frame.grid(row=10, column=1, columnspan=2, sticky="ew")
-        quiet_frame.columnconfigure(0, weight=1)
-        quiet_frame.columnconfigure(2, weight=1)
-        ttk.Entry(quiet_frame, textvariable=self.quiet_start).grid(
-            row=0, column=0, sticky="ew"
-        )
-        ttk.Label(quiet_frame, text="to").grid(row=0, column=1, padx=8)
-        ttk.Entry(quiet_frame, textvariable=self.quiet_end).grid(
-            row=0, column=2, sticky="ew"
-        )
-        ttk.Label(frame, text="Quiet hours").grid(row=10, column=0, sticky="w")
-
         buttons = ttk.Frame(frame)
-        buttons.grid(row=11, column=0, columnspan=3, sticky="ew", pady=(22, 8))
+        buttons.grid(row=9, column=0, columnspan=3, sticky="ew", pady=(22, 8))
         buttons.columnconfigure(0, weight=1)
         ttk.Button(buttons, text="Test Sound", command=self.test_sound).grid(
             row=0, column=0, sticky="w"
@@ -239,7 +210,7 @@ class FaahSettingsWindow:
         )
 
         ttk.Label(frame, textvariable=self.status_text, foreground="#555").grid(
-            row=12, column=0, columnspan=3, sticky="w", pady=(10, 0)
+            row=10, column=0, columnspan=3, sticky="w", pady=(10, 0)
         )
 
         for child in frame.winfo_children():
@@ -251,11 +222,6 @@ class FaahSettingsWindow:
         ttk.Label(frame, text=label).grid(row=row, column=0, sticky="w")
         ttk.Entry(frame, textvariable=variable).grid(
             row=row, column=1, columnspan=2, sticky="ew"
-        )
-
-    def hint(self, frame: ttk.Frame, row: int, text: str) -> None:
-        ttk.Label(frame, text=text, foreground="#666").grid(
-            row=row, column=1, columnspan=2, sticky="w"
         )
 
     def browse_sound(self) -> None:
@@ -302,17 +268,6 @@ class FaahSettingsWindow:
             )
             return None
 
-        quiet_hours = ""
-        if self.quiet_enabled.get():
-            start = self.quiet_start.get().strip()
-            end = self.quiet_end.get().strip()
-            if not TIME_RE.match(start) or not TIME_RE.match(end):
-                messagebox.showerror(
-                    "Invalid Quiet Hours", "Quiet hours must use HH:MM format."
-                )
-                return None
-            quiet_hours = f"{start}-{end}"
-
         try:
             volume = max(0, min(100, int(float(self.volume.get()))))
         except (TclError, ValueError):
@@ -328,7 +283,6 @@ class FaahSettingsWindow:
             "_FAAH_MIN_DURATION_SECONDS": min_duration,
             "_FAAH_IGNORE_EXIT_CODES": normalize_exit_codes(ignored),
             "_FAAH_IGNORE_COMMAND_REGEX": self.ignore_command_regex.get().strip(),
-            "_FAAH_QUIET_HOURS": quiet_hours,
         }
 
     def save(self) -> bool:

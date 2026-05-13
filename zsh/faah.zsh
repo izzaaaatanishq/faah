@@ -25,7 +25,6 @@ typeset -g _FAAH_COOLDOWN_SECONDS="${_FAAH_COOLDOWN_SECONDS:-1.5}"
 typeset -g _FAAH_MIN_DURATION_SECONDS="${_FAAH_MIN_DURATION_SECONDS:-0}"
 typeset -g _FAAH_IGNORE_EXIT_CODES="${_FAAH_IGNORE_EXIT_CODES:-130}"
 typeset -g _FAAH_IGNORE_COMMAND_REGEX="${_FAAH_IGNORE_COMMAND_REGEX:-}"
-typeset -g _FAAH_QUIET_HOURS="${_FAAH_QUIET_HOURS:-}"
 
 _faah_config_file() {
   if [[ -n "$_FAAH_CONFIG_FILE" ]]; then
@@ -51,7 +50,6 @@ _faah_clear_public_settings() {
   unset FAAH_MIN_DURATION_SECONDS
   unset FAAH_IGNORE_EXIT_CODES
   unset FAAH_IGNORE_COMMAND_REGEX
-  unset FAAH_QUIET_HOURS
   unset FAAH_PLAYER
   unset FAAH_CONFIG_FILE
 }
@@ -243,52 +241,6 @@ _faah_command_ignored() {
   [[ "$1" =~ $_FAAH_IGNORE_COMMAND_REGEX ]]
 }
 
-_faah_time_to_minutes() {
-  local value="$1"
-  local time_regex='^([01]?[0-9]|2[0-3]):[0-5][0-9]$'
-  [[ "$value" =~ $time_regex ]] || return 1
-
-  local hours="${value%%:*}"
-  local minutes="${value#*:}"
-  print -r -- "$(( 10#$hours * 60 + 10#$minutes ))"
-}
-
-_faah_current_minutes() {
-  local current_time
-  if (( ${+builtins[strftime]} && ${+EPOCHSECONDS} )); then
-    strftime -s current_time "%H:%M" "$EPOCHSECONDS"
-  else
-    current_time="$(date +%H:%M)"
-  fi
-
-  _faah_time_to_minutes "$current_time"
-}
-
-_faah_quiet_hours_active() {
-  local range="$_FAAH_QUIET_HOURS"
-  [[ -z "$range" ]] && return 1
-
-  local start_time="${range%-*}"
-  local end_time="${range#*-}"
-  [[ "$start_time" == "$range" || -z "$start_time" || -z "$end_time" ]] && return 1
-
-  local start_minutes end_minutes now_minutes
-  start_minutes="$(_faah_time_to_minutes "$start_time")" || return 1
-  end_minutes="$(_faah_time_to_minutes "$end_time")" || return 1
-  now_minutes="$(_faah_current_minutes)" || return 1
-
-  if (( start_minutes == end_minutes )); then
-    return 0
-  fi
-
-  if (( start_minutes < end_minutes )); then
-    (( now_minutes >= start_minutes && now_minutes < end_minutes ))
-    return $?
-  fi
-
-  (( now_minutes >= start_minutes || now_minutes < end_minutes ))
-}
-
 _faah_should_alert() {
   local exit_status="$1"
   local command_text="$2"
@@ -300,7 +252,6 @@ _faah_should_alert() {
   (( exit_status == 0 )) && return 1
   _faah_exit_code_ignored "$exit_status" && return 1
   _faah_command_ignored "$command_text" && return 1
-  _faah_quiet_hours_active && return 1
 
   now="$(_faah_now)"
 
@@ -440,7 +391,6 @@ faah-status() {
   print -r -- "Cooldown: ${_FAAH_COOLDOWN_SECONDS:-1.5}s"
   print -r -- "Minimum duration: ${_FAAH_MIN_DURATION_SECONDS:-0}s"
   print -r -- "Ignored exit codes: ${_FAAH_IGNORE_EXIT_CODES:-130}"
-  [[ -n "$_FAAH_QUIET_HOURS" ]] && print -r -- "Quiet hours: $_FAAH_QUIET_HOURS"
   return 0
 }
 
